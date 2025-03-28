@@ -19,7 +19,7 @@ export const createBlogPost = async (req: Request, res: Response): Promise<void>
 
         // Create new blog post with Cloudinary URL
         const newBlogPost = new blogModel({
-            blogImage: result.secure_url,
+            devmeBlogImage: result.secure_url,
             author: req.body.author,
             title: req.body.title,
             details: req.body.details
@@ -77,9 +77,9 @@ export const deleteBlogPost = async (req: Request, res: Response): Promise<void>
         }
 
         // Check if blogImage exists
-        if (blogPost.blogImage) {
+        if (blogPost.devmeBlogImage) {
             // Extract Cloudinary public ID from the image URL
-            const imageUrl: string = blogPost.blogImage;
+            const imageUrl: string = blogPost.devmeBlogImage;
             const segments = imageUrl.split('/');
             const publicId = segments[segments.length - 1].split('.')[0]; // Extract public ID
 

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 
 interface blogs {
-    blogImage: string | null,
+    devmeBlogImage: string | null,
     author: string,
     title: string;
     details: string;
@@ -12,7 +12,7 @@ interface blogs {
 interface iBlog extends blogs, mongoose.Document {};
 
 const blogSchema = new mongoose.Schema({
-    blogImage: {
+    devmeBlogImage: {
         type: String,
         required: [true, "please, upload image"]
     },

@@ -19,7 +19,7 @@ const uploadBlogImage = (0, multer_1.default)({
         fileSize: 5 * 1024 * 1024
     },
     fileFilter: function (req, file, cb) {
-        if (!file.originalname.match(/\.(jpg|png|jpeg|gif|PNG)$/)) {
+        if (!file.originalname.match(/\.(jpg|png|jpeg|gif|PNG|JPEG|JPG)$/)) {
             return cb(new Error("only images file are allowed!"), false);
         }
         cb(null, true);

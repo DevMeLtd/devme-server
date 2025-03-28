@@ -7,7 +7,7 @@ exports.blogModel = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 ;
 const blogSchema = new mongoose_1.default.Schema({
-    blogImage: {
+    devmeBlogImage: {
         type: String,
         required: [true, "please, upload image"]
     },
