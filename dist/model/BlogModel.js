@@ -23,6 +23,14 @@ const blogSchema = new mongoose_1.default.Schema({
         type: String,
         required: [true, "please, input details"]
     },
+    likesCount: {
+        type: Number,
+        default: 0
+    },
+    commentsCount: {
+        type: Number,
+        default: 0
+    },
     createdAt: {
         type: Date,
         default: Date.now,

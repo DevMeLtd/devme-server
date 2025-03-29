@@ -2,6 +2,7 @@ import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import blogRouter from "./routes/BlogRouter";
 import contactUsRouter from "./routes/ContactRouter";
+import commentRouter from "./routes/BlogInteractionRouter";
 
 
 const appConfig = (app: Application) => {
@@ -11,6 +12,7 @@ const appConfig = (app: Application) => {
     // routes
     app.use("/blog", blogRouter);
     app.use("/mail", contactUsRouter)
+    app.use("/action", commentRouter)
 
 
     app.get("/", (req: Request, res: Response): any => {

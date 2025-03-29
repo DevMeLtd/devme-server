@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteBlogPost = exports.getBlogPostById = exports.getAllBlogPosts = exports.createBlogPost = void 0;
 const BlogModel_1 = require("../model/BlogModel");
 const cloudinary_1 = __importDefault(require("../config/cloudinary"));
+const CommentModel_1 = require("../model/CommentModel");
 // Upload blog image to Cloudinary and create new blog post
 const createBlogPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -43,10 +44,10 @@ const createBlogPost = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.createBlogPost = createBlogPost;
-// Get all blog posts
+// In your getAllBlogPosts controller:
 const getAllBlogPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const blogPosts = yield BlogModel_1.blogModel.find();
+        const blogPosts = yield BlogModel_1.blogModel.find().sort({ createdAt: -1 });
         res.status(200).json(blogPosts);
     }
     catch (error) {
@@ -54,13 +55,14 @@ const getAllBlogPosts = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.getAllBlogPosts = getAllBlogPosts;
-// Get one blog post by ID
+// In your getBlogPostById controller, you might want to include comments:
 const getBlogPostById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     try {
         const blogPost = yield BlogModel_1.blogModel.findById(id);
         if (blogPost) {
-            res.status(200).json(blogPost);
+            const comments = yield CommentModel_1.commentModel.find({ blogId: id }).sort({ createdAt: -1 });
+            res.status(200).json(Object.assign(Object.assign({}, blogPost.toObject()), { comments }));
         }
         else {
             res.status(404).json({ message: 'Blog post not found' });

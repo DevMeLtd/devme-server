@@ -6,6 +6,8 @@ interface blogs {
     author: string,
     title: string;
     details: string;
+    likesCount: number;
+    commentsCount: number;
     createdAt: Date;
 }
 
@@ -27,6 +29,14 @@ const blogSchema = new mongoose.Schema({
     details : {
         type : String,
         required : [true, "please, input details"]
+    },
+    likesCount: { 
+        type: Number,
+         default: 0 
+        },
+    commentsCount: { 
+        type: Number, 
+        default: 0 
     },
     createdAt : {
         type : Date,

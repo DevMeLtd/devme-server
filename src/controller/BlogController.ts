@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { blogModel } from '../model/BlogModel';
 import cloudinary from '../config/cloudinary';
+import { commentModel } from '../model/CommentModel';
 
 
 
@@ -37,24 +38,24 @@ export const createBlogPost = async (req: Request, res: Response): Promise<void>
 };
 
 
-// Get all blog posts
+// In your getAllBlogPosts controller:
 export const getAllBlogPosts = async (req: Request, res: Response): Promise<void> => {
     try {
-        const blogPosts = await blogModel.find();
+        const blogPosts = await blogModel.find().sort({ createdAt: -1 });
         res.status(200).json(blogPosts);
     } catch (error: any) {
         res.status(500).json({ message: error.message });
     }
 };
 
-
-// Get one blog post by ID
+// In your getBlogPostById controller, you might want to include comments:
 export const getBlogPostById = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     try {
         const blogPost = await blogModel.findById(id);
         if (blogPost) {
-            res.status(200).json(blogPost);
+            const comments = await commentModel.find({ blogId: id }).sort({ createdAt: -1 });
+            res.status(200).json({ ...blogPost.toObject(), comments });
         } else {
             res.status(404).json({ message: 'Blog post not found' });
         }
