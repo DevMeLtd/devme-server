@@ -44,7 +44,7 @@ export const getAllAppointments = async (req: Request, res: Response) => {
   }
 };
 
-export const updateAppointmentStatus = async (req: Request, res: Response) => {
+export const updateAppointmentStatus = async (req: Request, res: Response):Promise<any> => {
   try {
     const { id } = req.params;
     const { status } = req.body;

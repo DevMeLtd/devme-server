@@ -8,5 +8,5 @@ const appointmentController_1 = require("../controller/appointmentController");
 const appointRouter = express_1.default.Router();
 appointRouter.post('/createappoint', appointmentController_1.createAppointment);
 appointRouter.get('/getallappoint', appointmentController_1.getAllAppointments);
-// appointRouter.patch('/:id/status', updateAppointmentStatus);
+appointRouter.patch('/:id/status', appointmentController_1.updateAppointmentStatus);
 exports.default = appointRouter;
