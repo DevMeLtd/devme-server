@@ -9,6 +9,7 @@ const BlogRouter_1 = __importDefault(require("./routes/BlogRouter"));
 const ContactRouter_1 = __importDefault(require("./routes/ContactRouter"));
 const BlogInteractionRouter_1 = __importDefault(require("./routes/BlogInteractionRouter"));
 const appointmentRoutes_1 = __importDefault(require("./routes/appointmentRoutes"));
+const DesignRoutes_1 = __importDefault(require("./routes/DesignRoutes"));
 const appConfig = (app) => {
     app.use(express_1.default.json()).use((0, cors_1.default)());
     // routes
@@ -16,6 +17,7 @@ const appConfig = (app) => {
     app.use("/mail", ContactRouter_1.default);
     app.use("/action", BlogInteractionRouter_1.default);
     app.use("/appoint", appointmentRoutes_1.default);
+    app.use("/design", DesignRoutes_1.default);
     app.get("/", (req, res) => {
         return res.status(200).json({
             message: "default get server"
