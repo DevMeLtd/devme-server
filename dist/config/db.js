@@ -13,21 +13,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
+const axios_1 = __importDefault(require("axios"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const uri = process.env.MONGOOSE_DB;
-console.log("Mongo-URI", process.env.MONGOOSE_DB);
+console.log("Mongo-URI:", uri);
 if (!uri) {
-    console.error("MONGOOSE_DB environment variable is not defined");
-    process.exit();
+    console.error("❌ MONGOOSE_DB environment variable is not defined");
+    process.exit(1);
 }
 const dbConfig = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        // Optional: Log outbound IP address (helpful for MongoDB Atlas whitelist)
+        const { data } = yield axios_1.default.get('https://api.ipify.org?format=json');
+        console.log("🌐 Render Public IP Address:", data.ip);
         const connectDB = yield mongoose_1.default.connect(uri);
-        console.log(`connected to database on port ${connectDB.connection.host}`);
+        console.log(`✅ Connected to MongoDB at ${connectDB.connection.host}`);
     }
     catch (error) {
-        console.log(`failed to connect to database`, error);
+        console.error("❌ Failed to connect to MongoDB:", error);
     }
 });
 exports.default = dbConfig;
