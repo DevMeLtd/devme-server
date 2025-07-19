@@ -16,6 +16,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const uri = process.env.MONGOOSE_DB;
+console.log("Mongo-URI", process.env.MONGOOSE_DB);
 if (!uri) {
     console.error("MONGOOSE_DB environment variable is not defined");
     process.exit();

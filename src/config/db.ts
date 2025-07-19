@@ -4,6 +4,7 @@ import env from "dotenv";
 env.config()
 
 const uri = process.env.MONGOOSE_DB
+console.log("Mongo-URI", process.env.MONGOOSE_DB)
 
 
 
