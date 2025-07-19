@@ -17,6 +17,7 @@ const appConfig = (app: Application) => {
     app.use("/action", commentRouter)
     app.use("/appoint", appointRouter)
     app.use("/design", designRouter)
+    // app.use("/design", designRouter)
 
 
     app.get("/", (req: Request, res: Response): any => {
