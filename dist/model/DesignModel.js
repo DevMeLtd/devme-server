@@ -35,6 +35,9 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const DesignFormSchema = new mongoose_1.Schema({
+    designType: {
+        design: { type: String, required: true }
+    },
     schoolInfo: {
         schoolName: { type: String, required: true },
         currentGrade: { type: String, required: true },

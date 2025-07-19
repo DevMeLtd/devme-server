@@ -1,6 +1,9 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IDesignForm extends Document {
+  designType: {
+    design: string;
+  };
   schoolInfo: {
     schoolName: string;
     currentGrade: string;
@@ -43,6 +46,9 @@ export interface IDesignForm extends Document {
 }
 
 const DesignFormSchema: Schema = new Schema({
+  designType: {
+    design: { type: String, required: true }
+  },
   schoolInfo: {
     schoolName: { type: String, required: true },
     currentGrade: { type: String, required: true },
