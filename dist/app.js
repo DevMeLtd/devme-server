@@ -18,6 +18,7 @@ const appConfig = (app) => {
     app.use("/action", BlogInteractionRouter_1.default);
     app.use("/appoint", appointmentRoutes_1.default);
     app.use("/design", DesignRoutes_1.default);
+    // app.use("/design", designRouter)
     app.get("/", (req, res) => {
         return res.status(200).json({
             message: "default get server"

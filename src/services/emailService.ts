@@ -28,7 +28,7 @@ export const sendConfirmationEmail = async (options: EmailOptions) => {
         <p>Your appointment for <strong>${options.childName}</strong> has been successfully booked.</p>
         <p><strong>Appointment Date:</strong> ${options.appointmentDate.toLocaleString()}</p>
         <p>Our team will reach out to you shortly with more details about the session.</p>
-        <p>If you need to reschedule or have any questions, please contact us at support@thesdevme.com</p>
+        <p>If you need to reschedule or have any questions, please contact us at support@thedevme.com</p>
         <br/>
         <p>Best regards,</p>
         <p>The DevMe Wellness Team</p>
