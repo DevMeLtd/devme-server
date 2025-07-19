@@ -8,7 +8,7 @@ const uri = process.env.MONGOOSE_DB
 
 
 if (!uri) {
-    console.error("MONGOOSE_DB environment variable is nort defined");
+    console.error("MONGOOSE_DB environment variable is not defined");
     process.exit();
 }
 
