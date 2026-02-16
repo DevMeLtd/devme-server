@@ -14,18 +14,45 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteDiscoverySession = exports.updateDiscoverySession = exports.getDiscoverySessionById = exports.getAllDiscoverySessions = exports.createDiscoverySession = void 0;
 const DiscoverySession_1 = __importDefault(require("../model/DiscoverySession"));
+// Helper function to parse various date formats
+const parseDate = (dateStr) => {
+    // If already in YYYY-MM-DD format
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+        return new Date(dateStr);
+    }
+    // Handle DD-MM-YYYY format
+    if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
+        const [day, month, year] = dateStr.split('-');
+        return new Date(`${year}-${month}-${day}`);
+    }
+    // Handle DD/MM/YYYY format
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+        const [day, month, year] = dateStr.split('/');
+        return new Date(`${year}-${month}-${day}`);
+    }
+    return null;
+};
 // @desc    Create a new discovery session booking
 // @route   POST /discovery
 // @access  Public
 const createDiscoverySession = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { name, email, phone, appointmentDate, appointmentTime } = req.body;
-        // Create booking
+        let { name, email, phone, appointmentDate, appointmentTime } = req.body;
+        // Parse the date
+        const parsedDate = parseDate(appointmentDate);
+        if (!parsedDate) {
+            res.status(400).json({
+                success: false,
+                errors: ['Invalid date format. Please use YYYY-MM-DD, DD-MM-YYYY, or DD/MM/YYYY']
+            });
+            return;
+        }
+        // Create booking with parsed date
         const session = yield DiscoverySession_1.default.create({
             name,
             email,
             phone,
-            appointmentDate: new Date(appointmentDate),
+            appointmentDate: parsedDate,
             appointmentTime
         });
         res.status(201).json({
@@ -43,7 +70,6 @@ const createDiscoverySession = (req, res) => __awaiter(void 0, void 0, void 0, f
     }
     catch (error) {
         console.error('Error creating discovery session:', error);
-        // Handle validation errors
         if (error.name === 'ValidationError') {
             const errors = Object.values(error.errors).map((err) => err.message);
             res.status(400).json({

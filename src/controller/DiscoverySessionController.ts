@@ -1,19 +1,53 @@
 import { Request, Response } from 'express';
 import DiscoverySession from '../model/DiscoverySession';
 
+
+// Helper function to parse various date formats
+const parseDate = (dateStr: string): Date | null => {
+  // If already in YYYY-MM-DD format
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    return new Date(dateStr);
+  }
+  
+  // Handle DD-MM-YYYY format
+  if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
+    const [day, month, year] = dateStr.split('-');
+    return new Date(`${year}-${month}-${day}`);
+  }
+  
+  // Handle DD/MM/YYYY format
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+    const [day, month, year] = dateStr.split('/');
+    return new Date(`${year}-${month}-${day}`);
+  }
+  
+  return null;
+};
+
 // @desc    Create a new discovery session booking
 // @route   POST /discovery
 // @access  Public
 export const createDiscoverySession = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, email, phone, appointmentDate, appointmentTime } = req.body;
+    let { name, email, phone, appointmentDate, appointmentTime } = req.body;
 
-    // Create booking
+    // Parse the date
+    const parsedDate = parseDate(appointmentDate);
+    
+    if (!parsedDate) {
+      res.status(400).json({
+        success: false,
+        errors: ['Invalid date format. Please use YYYY-MM-DD, DD-MM-YYYY, or DD/MM/YYYY']
+      });
+      return;
+    }
+
+    // Create booking with parsed date
     const session = await DiscoverySession.create({
       name,
       email,
       phone,
-      appointmentDate: new Date(appointmentDate),
+      appointmentDate: parsedDate,
       appointmentTime
     });
 
@@ -33,7 +67,6 @@ export const createDiscoverySession = async (req: Request, res: Response): Promi
   } catch (error: any) {
     console.error('Error creating discovery session:', error);
     
-    // Handle validation errors
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map((err: any) => err.message);
       res.status(400).json({
