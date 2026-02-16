@@ -63,31 +63,17 @@ const discoverySessionSchema = new mongoose_1.Schema({
     },
     appointmentDate: {
         type: Date,
-        required: [true, 'Appointment date is required'],
-        validate: {
-            validator: function (value) {
-                return value > new Date();
-            },
-            message: 'Appointment date must be in the future'
-        }
+        required: [true, 'Appointment date is required']
     },
     appointmentTime: {
         type: String,
-        required: [true, 'Appointment time is required'],
-        enum: {
-            values: [
-                "09:00 AM", "10:00 AM", "11:00 AM",
-                "12:00 PM", "01:00 PM", "02:00 PM",
-                "03:00 PM", "04:00 PM", "05:00 PM"
-            ],
-            message: 'Please select a valid time slot'
-        }
+        required: [true, 'Appointment time is required']
     }
 }, {
     timestamps: true
 });
 // Index for efficient querying
 discoverySessionSchema.index({ email: 1 });
-discoverySessionSchema.index({ appointmentDate: 1, appointmentTime: 1 });
+discoverySessionSchema.index({ createdAt: -1 });
 const DiscoverySession = mongoose_1.default.model('DiscoverySession', discoverySessionSchema);
 exports.default = DiscoverySession;

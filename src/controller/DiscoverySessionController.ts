@@ -1,27 +1,12 @@
 import { Request, Response } from 'express';
 import DiscoverySession from '../model/DiscoverySession';
-// import DiscoverySession, { IDiscoverySession } from '../models/DiscoverySession';
 
 // @desc    Create a new discovery session booking
-// @route   POST /api/discovery-sessions
+// @route   POST /discovery
 // @access  Public
 export const createDiscoverySession = async (req: Request, res: Response): Promise<void> => {
   try {
     const { name, email, phone, appointmentDate, appointmentTime } = req.body;
-
-    // Check if slot is already booked
-    const existingBooking = await DiscoverySession.findOne({
-      appointmentDate: new Date(appointmentDate),
-      appointmentTime
-    });
-
-    if (existingBooking) {
-      res.status(409).json({
-        success: false,
-        message: 'This time slot is already booked. Please select another time.'
-      });
-      return;
-    }
 
     // Create booking
     const session = await DiscoverySession.create({
@@ -40,7 +25,8 @@ export const createDiscoverySession = async (req: Request, res: Response): Promi
         email: session.email,
         phone: session.phone,
         appointmentDate: session.appointmentDate,
-        appointmentTime: session.appointmentTime
+        appointmentTime: session.appointmentTime,
+        createdAt: session.createdAt
       }
     });
 
@@ -64,94 +50,8 @@ export const createDiscoverySession = async (req: Request, res: Response): Promi
   }
 };
 
-// @desc    Check if a specific time slot is available
-// @route   POST /api/discovery-sessions/check-availability
-// @access  Public
-export const checkAvailability = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { date, time } = req.body;
-
-    if (!date || !time) {
-      res.status(400).json({
-        success: false,
-        message: 'Date and time are required'
-      });
-      return;
-    }
-
-    const existingBooking = await DiscoverySession.findOne({
-      appointmentDate: new Date(date),
-      appointmentTime: time
-    });
-
-    res.status(200).json({
-      success: true,
-      data: {
-        date,
-        time,
-        available: !existingBooking
-      }
-    });
-
-  } catch (error) {
-    console.error('Error checking availability:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to check availability'
-    });
-  }
-};
-
-// @desc    Get all available time slots for a specific date
-// @route   GET /api/discovery-sessions/available-slots
-// @access  Public
-export const getAvailableSlots = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { date } = req.query;
-
-    if (!date) {
-      res.status(400).json({
-        success: false,
-        message: 'Date is required'
-      });
-      return;
-    }
-
-    const allTimeSlots = [
-      "09:00 AM", "10:00 AM", "11:00 AM",
-      "12:00 PM", "01:00 PM", "02:00 PM",
-      "03:00 PM", "04:00 PM", "05:00 PM"
-    ];
-
-    // Find booked slots for the date
-    const bookedSessions = await DiscoverySession.find({
-      appointmentDate: new Date(date as string),
-      appointmentTime: { $in: allTimeSlots }
-    });
-
-    const bookedSlots = bookedSessions.map(session => session.appointmentTime);
-    const availableSlots = allTimeSlots.filter(slot => !bookedSlots.includes(slot));
-
-    res.status(200).json({
-      success: true,
-      data: {
-        date,
-        availableSlots,
-        bookedSlots
-      }
-    });
-
-  } catch (error) {
-    console.error('Error fetching available slots:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch available slots'
-    });
-  }
-};
-
 // @desc    Get all discovery sessions (Admin only)
-// @route   GET /api/discovery-sessions
+// @route   GET /discovery
 // @access  Private/Admin
 export const getAllDiscoverySessions = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -184,6 +84,116 @@ export const getAllDiscoverySessions = async (req: Request, res: Response): Prom
     res.status(500).json({
       success: false,
       message: 'Failed to fetch sessions'
+    });
+  }
+};
+
+// @desc    Get single discovery session by ID
+// @route   GET /discovery/:id
+// @access  Private/Admin
+export const getDiscoverySessionById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const session = await DiscoverySession.findById(req.params.id);
+
+    if (!session) {
+      res.status(404).json({
+        success: false,
+        message: 'Session not found'
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      data: session
+    });
+
+  } catch (error) {
+    console.error('Error fetching discovery session:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch session'
+    });
+  }
+};
+
+// @desc    Update discovery session
+// @route   PUT /discovery/:id
+// @access  Private/Admin
+export const updateDiscoverySession = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { name, email, phone, appointmentDate, appointmentTime } = req.body;
+
+    const session = await DiscoverySession.findById(req.params.id);
+
+    if (!session) {
+      res.status(404).json({
+        success: false,
+        message: 'Session not found'
+      });
+      return;
+    }
+
+    // Update fields
+    if (name) session.name = name;
+    if (email) session.email = email;
+    if (phone) session.phone = phone;
+    if (appointmentDate) session.appointmentDate = new Date(appointmentDate);
+    if (appointmentTime) session.appointmentTime = appointmentTime;
+
+    await session.save();
+
+    res.status(200).json({
+      success: true,
+      data: session
+    });
+
+  } catch (error: any) {
+    console.error('Error updating discovery session:', error);
+    
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map((err: any) => err.message);
+      res.status(400).json({
+        success: false,
+        errors
+      });
+      return;
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update session'
+    });
+  }
+};
+
+// @desc    Delete discovery session
+// @route   DELETE /discovery/:id
+// @access  Private/Admin
+export const deleteDiscoverySession = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const session = await DiscoverySession.findById(req.params.id);
+
+    if (!session) {
+      res.status(404).json({
+        success: false,
+        message: 'Session not found'
+      });
+      return;
+    }
+
+    await session.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: 'Session deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('Error deleting discovery session:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete session'
     });
   }
 };

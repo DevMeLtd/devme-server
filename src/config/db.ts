@@ -15,8 +15,8 @@ if (!uri) {
 const dbConfig = async (): Promise<void> => {
   try {
     // Optional: Log outbound IP address (helpful for MongoDB Atlas whitelist)
-    const { data } = await axios.get('https://api.ipify.org?format=json');
-    console.log("🌐 Render Public IP Address:", data.ip);
+    // const { data } = await axios.get('https://api.ipify.org?format=json');
+    // console.log("🌐 Render Public IP Address:", data.ip);
 
     const connectDB = await mongoose.connect(uri);
     console.log(`✅ Connected to MongoDB at ${connectDB.connection.host}`);

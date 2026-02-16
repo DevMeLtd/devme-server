@@ -12,27 +12,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllDiscoverySessions = exports.getAvailableSlots = exports.checkAvailability = exports.createDiscoverySession = void 0;
+exports.deleteDiscoverySession = exports.updateDiscoverySession = exports.getDiscoverySessionById = exports.getAllDiscoverySessions = exports.createDiscoverySession = void 0;
 const DiscoverySession_1 = __importDefault(require("../model/DiscoverySession"));
-// import DiscoverySession, { IDiscoverySession } from '../models/DiscoverySession';
 // @desc    Create a new discovery session booking
-// @route   POST /api/discovery-sessions
+// @route   POST /discovery
 // @access  Public
 const createDiscoverySession = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { name, email, phone, appointmentDate, appointmentTime } = req.body;
-        // Check if slot is already booked
-        const existingBooking = yield DiscoverySession_1.default.findOne({
-            appointmentDate: new Date(appointmentDate),
-            appointmentTime
-        });
-        if (existingBooking) {
-            res.status(409).json({
-                success: false,
-                message: 'This time slot is already booked. Please select another time.'
-            });
-            return;
-        }
         // Create booking
         const session = yield DiscoverySession_1.default.create({
             name,
@@ -49,7 +36,8 @@ const createDiscoverySession = (req, res) => __awaiter(void 0, void 0, void 0, f
                 email: session.email,
                 phone: session.phone,
                 appointmentDate: session.appointmentDate,
-                appointmentTime: session.appointmentTime
+                appointmentTime: session.appointmentTime,
+                createdAt: session.createdAt
             }
         });
     }
@@ -71,86 +59,8 @@ const createDiscoverySession = (req, res) => __awaiter(void 0, void 0, void 0, f
     }
 });
 exports.createDiscoverySession = createDiscoverySession;
-// @desc    Check if a specific time slot is available
-// @route   POST /api/discovery-sessions/check-availability
-// @access  Public
-const checkAvailability = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { date, time } = req.body;
-        if (!date || !time) {
-            res.status(400).json({
-                success: false,
-                message: 'Date and time are required'
-            });
-            return;
-        }
-        const existingBooking = yield DiscoverySession_1.default.findOne({
-            appointmentDate: new Date(date),
-            appointmentTime: time
-        });
-        res.status(200).json({
-            success: true,
-            data: {
-                date,
-                time,
-                available: !existingBooking
-            }
-        });
-    }
-    catch (error) {
-        console.error('Error checking availability:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to check availability'
-        });
-    }
-});
-exports.checkAvailability = checkAvailability;
-// @desc    Get all available time slots for a specific date
-// @route   GET /api/discovery-sessions/available-slots
-// @access  Public
-const getAvailableSlots = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { date } = req.query;
-        if (!date) {
-            res.status(400).json({
-                success: false,
-                message: 'Date is required'
-            });
-            return;
-        }
-        const allTimeSlots = [
-            "09:00 AM", "10:00 AM", "11:00 AM",
-            "12:00 PM", "01:00 PM", "02:00 PM",
-            "03:00 PM", "04:00 PM", "05:00 PM"
-        ];
-        // Find booked slots for the date
-        const bookedSessions = yield DiscoverySession_1.default.find({
-            appointmentDate: new Date(date),
-            appointmentTime: { $in: allTimeSlots }
-        });
-        const bookedSlots = bookedSessions.map(session => session.appointmentTime);
-        const availableSlots = allTimeSlots.filter(slot => !bookedSlots.includes(slot));
-        res.status(200).json({
-            success: true,
-            data: {
-                date,
-                availableSlots,
-                bookedSlots
-            }
-        });
-    }
-    catch (error) {
-        console.error('Error fetching available slots:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to fetch available slots'
-        });
-    }
-});
-exports.getAvailableSlots = getAvailableSlots;
 // @desc    Get all discovery sessions (Admin only)
-// @route   GET /api/discovery-sessions
+// @route   GET /discovery
 // @access  Private/Admin
 const getAllDiscoverySessions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -184,3 +94,106 @@ const getAllDiscoverySessions = (req, res) => __awaiter(void 0, void 0, void 0, 
     }
 });
 exports.getAllDiscoverySessions = getAllDiscoverySessions;
+// @desc    Get single discovery session by ID
+// @route   GET /discovery/:id
+// @access  Private/Admin
+const getDiscoverySessionById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const session = yield DiscoverySession_1.default.findById(req.params.id);
+        if (!session) {
+            res.status(404).json({
+                success: false,
+                message: 'Session not found'
+            });
+            return;
+        }
+        res.status(200).json({
+            success: true,
+            data: session
+        });
+    }
+    catch (error) {
+        console.error('Error fetching discovery session:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch session'
+        });
+    }
+});
+exports.getDiscoverySessionById = getDiscoverySessionById;
+// @desc    Update discovery session
+// @route   PUT /discovery/:id
+// @access  Private/Admin
+const updateDiscoverySession = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { name, email, phone, appointmentDate, appointmentTime } = req.body;
+        const session = yield DiscoverySession_1.default.findById(req.params.id);
+        if (!session) {
+            res.status(404).json({
+                success: false,
+                message: 'Session not found'
+            });
+            return;
+        }
+        // Update fields
+        if (name)
+            session.name = name;
+        if (email)
+            session.email = email;
+        if (phone)
+            session.phone = phone;
+        if (appointmentDate)
+            session.appointmentDate = new Date(appointmentDate);
+        if (appointmentTime)
+            session.appointmentTime = appointmentTime;
+        yield session.save();
+        res.status(200).json({
+            success: true,
+            data: session
+        });
+    }
+    catch (error) {
+        console.error('Error updating discovery session:', error);
+        if (error.name === 'ValidationError') {
+            const errors = Object.values(error.errors).map((err) => err.message);
+            res.status(400).json({
+                success: false,
+                errors
+            });
+            return;
+        }
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update session'
+        });
+    }
+});
+exports.updateDiscoverySession = updateDiscoverySession;
+// @desc    Delete discovery session
+// @route   DELETE /discovery/:id
+// @access  Private/Admin
+const deleteDiscoverySession = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const session = yield DiscoverySession_1.default.findById(req.params.id);
+        if (!session) {
+            res.status(404).json({
+                success: false,
+                message: 'Session not found'
+            });
+            return;
+        }
+        yield session.deleteOne();
+        res.status(200).json({
+            success: true,
+            message: 'Session deleted successfully'
+        });
+    }
+    catch (error) {
+        console.error('Error deleting discovery session:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to delete session'
+        });
+    }
+});
+exports.deleteDiscoverySession = deleteDiscoverySession;

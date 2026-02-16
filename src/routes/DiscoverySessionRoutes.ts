@@ -2,34 +2,27 @@ import express from 'express';
 import {
   createDiscoverySession,
   getAllDiscoverySessions,
-  checkAvailability,
-  getAvailableSlots
+  getDiscoverySessionById,
+  updateDiscoverySession,
+  deleteDiscoverySession
 } from '../controller/DiscoverySessionController';
 // import { protect, admin } from '../middleware/authMiddleware';
-import { rateLimit } from 'express-rate-limit';
 
 const discoveryRouter = express.Router();
 
-// Rate limiting for public routes
-const bookingLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 booking requests per 15 minutes
-  message: 'Too many booking attempts, please try again after 15 minutes'
-});
+// Public route
+discoveryRouter.post('/', createDiscoverySession);
 
-const availabilityLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 30, // Limit each IP to 30 availability checks per minute
-  message: 'Too many requests, please slow down'
-});
-
-// Public routes
-discoveryRouter.post('/', bookingLimiter, createDiscoverySession);
-discoveryRouter.post('/check-availability', availabilityLimiter, checkAvailability);
-discoveryRouter.get('/available-slots', availabilityLimiter, getAvailableSlots);
-
-// Protected routes (Admin only)
+// Protected routes (Admin only) - Uncomment protect and admin when ready
 // discoveryRouter.get('/', protect, admin, getAllDiscoverySessions);
+// discoveryRouter.get('/:id', protect, admin, getDiscoverySessionById);
+// discoveryRouter.put('/:id', protect, admin, updateDiscoverySession);
+// discoveryRouter.delete('/:id', protect, admin, deleteDiscoverySession);
+
+// For now, public for testing
 discoveryRouter.get('/', getAllDiscoverySessions);
+discoveryRouter.get('/:id', getDiscoverySessionById);
+discoveryRouter.put('/:id', updateDiscoverySession);
+discoveryRouter.delete('/:id', deleteDiscoverySession);
 
 export default discoveryRouter;
