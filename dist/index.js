@@ -9,7 +9,7 @@ const app_1 = __importDefault(require("./app"));
 const app = (0, express_1.default)();
 (0, app_1.default)(app);
 (0, db_1.default)();
-const port = 2025;
+const port = 2026;
 app.listen(port, () => {
     console.log(`server is listening on port ${port}`);
 });

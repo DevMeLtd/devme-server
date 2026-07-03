@@ -6,6 +6,8 @@ import commentRouter from "./routes/BlogInteractionRouter";
 import appointRouter from "./routes/appointmentRoutes";
 import designRouter from "./routes/DesignRoutes";
 import discoveryRouter from "./routes/DiscoverySessionRoutes";
+import adminRouter from "./routes/adminRoutes";
+import futureRouter from "./routes/applicationRoutes";
 
 
 const appConfig = (app: Application) => {
@@ -20,6 +22,9 @@ const appConfig = (app: Application) => {
     app.use("/design", designRouter)
     // app.use("/design", designRouter)
     app.use("/discovery", discoveryRouter)
+
+    app.use("/admin", adminRouter)
+    app.use("/future", futureRouter)
 
 
     app.get("/", (req: Request, res: Response): any => {

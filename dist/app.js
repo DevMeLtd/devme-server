@@ -11,6 +11,8 @@ const BlogInteractionRouter_1 = __importDefault(require("./routes/BlogInteractio
 const appointmentRoutes_1 = __importDefault(require("./routes/appointmentRoutes"));
 const DesignRoutes_1 = __importDefault(require("./routes/DesignRoutes"));
 const DiscoverySessionRoutes_1 = __importDefault(require("./routes/DiscoverySessionRoutes"));
+const adminRoutes_1 = __importDefault(require("./routes/adminRoutes"));
+const applicationRoutes_1 = __importDefault(require("./routes/applicationRoutes"));
 const appConfig = (app) => {
     app.use(express_1.default.json()).use((0, cors_1.default)());
     // routes
@@ -21,6 +23,8 @@ const appConfig = (app) => {
     app.use("/design", DesignRoutes_1.default);
     // app.use("/design", designRouter)
     app.use("/discovery", DiscoverySessionRoutes_1.default);
+    app.use("/admin", adminRoutes_1.default);
+    app.use("/future", applicationRoutes_1.default);
     app.get("/", (req, res) => {
         return res.status(200).json({
             message: "default get server"

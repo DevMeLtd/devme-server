@@ -8,7 +8,7 @@ appConfig(app);
 dbConfig();
 
 
-const port = 2025
+const port = 2026
 
 app.listen(port, () => {
     console.log(`server is listening on port ${port}`)
