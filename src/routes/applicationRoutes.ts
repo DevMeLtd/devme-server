@@ -7,18 +7,15 @@ import {
   deleteApplication,
   getApplicationStats
 } from '../controller/applicationcontroller';
-// import { protect, adminOnly } from '../middleware/auth.js';
 import { uploadVideo } from '../middleware/upload.js';
 import { authenticateAdmin } from '../middleware/adminAuthMiddleware';
 
 const futureRouter = express.Router();
 
-// Public route
 futureRouter.post('/', uploadVideo, submitApplication);
 
 // Admin only routes
 futureRouter.use(authenticateAdmin);
-// futureRouter.use(adminOnly);
 
 futureRouter.get('/getall', getAllApplications);
 futureRouter.get('/stats/summary', getApplicationStats);
