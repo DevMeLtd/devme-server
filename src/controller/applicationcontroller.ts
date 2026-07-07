@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import Application from '../model/Application';
 import { AuthRequest } from '../middleware/auth.js';
-import { sendApplicationConfirmation } from '../services/emailService'
+import { sendAdminNotification, sendApplicationConfirmation, sendStatusUpdateEmail } from '../services/emailService'
 
 // @desc    Submit new application
 // @route   POST /api/applications
@@ -14,16 +14,15 @@ export const submitApplication = async (req: Request, res: Response): Promise<vo
     if (req.file) {
       applicationData.submissionFile = req.file.path;
       applicationData.submissionType = 'Video';
-      applicationData.submissionUrl = req.file.path; // For backward compatibility
+      applicationData.submissionUrl = req.file.path;
     } else if (applicationData.submissionUrl) {
       applicationData.submissionType = 'Link';
-      // Keep the URL as provided
     }
     
     // Create application
     const application = await Application.create(applicationData);
     
-    // Send confirmation email to parent
+    // Send confirmation email to parent/guardian
     try {
       await sendApplicationConfirmation({
         email: application.parentEmail,
@@ -31,21 +30,29 @@ export const submitApplication = async (req: Request, res: Response): Promise<vo
         childName: `${application.firstName} ${application.lastName}`,
         applicationTrack: application.applicationTrack
       });
+      console.log('Confirmation email sent to parent:', application.parentEmail);
     } catch (emailError) {
       console.error('Email sending failed:', emailError);
-      // Don't fail the application submission if email fails
+    }
+    
+    // Send admin notification
+    try {
+      const adminEmail = process.env.EMAIL_USER || 'devmeltd@gmail.com';
+      await sendAdminNotification({
+        adminEmail: adminEmail,
+        childName: `${application.firstName} ${application.lastName}`,
+        parentName: application.parentName,
+        applicationTrack: application.applicationTrack,
+        applicationId: application._id.toString()
+      });
+      console.log('Admin notification sent to:', adminEmail);
+    } catch (emailError) {
+      console.error('Admin notification failed:', emailError);
     }
     
     res.status(201).json({
       success: true,
       message: 'Application submitted successfully',
-      // applicationId: application._id,
-      // data: {
-      //   id: application._id,
-      //   submissionType: application.submissionType,
-      //   submissionFile: application.submissionFile,
-      //   submissionUrl: application.submissionUrl
-      // }
       application
     });
   } catch (error: any) {
@@ -220,12 +227,35 @@ export const updateApplicationStatus = async (req: AuthRequest, res: Response): 
       return;
     }
     
+    const previousStatus = application.status;
     application.status = status;
     if (adminNotes) application.adminNotes = adminNotes;
     
     await application.save();
     
-    res.status(200).json({ success: true, application });
+    // Send email notification to parent/guardian when status changes to shortlisted or accepted
+    if ((status === 'shortlisted' || status === 'accepted') && status !== previousStatus) {
+      try {
+        await sendStatusUpdateEmail({
+          email: application.parentEmail,
+          parentName: application.parentName,
+          childName: `${application.firstName} ${application.lastName}`,
+          status: status,
+          applicationTrack: application.applicationTrack,
+          adminNotes: adminNotes
+        });
+        console.log(`Status update email sent to parent for ${status}:`, application.parentEmail);
+      } catch (emailError) {
+        console.error('Status update email failed:', emailError);
+        // Don't fail the request if email fails
+      }
+    }
+    
+    res.status(200).json({ 
+      success: true, 
+      message: `Application ${status} successfully`,
+      application 
+    });
   } catch (error) {
     console.error('Update application status error:', error);
     res.status(500).json({ success: false, message: 'Server error' });
